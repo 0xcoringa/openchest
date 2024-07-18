@@ -1,0 +1,47 @@
+function clickButton(xpath, callback) {
+    let button = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    if (button) {
+        button.click();
+        if (callback) {
+            callback();
+        }
+    } else {
+        console.error('Elemento não encontrado:', xpath);
+    }
+}
+
+function isButtonDisabled(xpath) {
+    let button = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    return button ? button.hasAttribute('disabled') : true;
+}
+
+const firstButtonXPath = '//*[@id="root"]/div/div/main/div/div[6]/div[2]/div[1]/button';
+const secondButtonXPath = '/html/body/div[2]/div/div[2]/div/div[2]/div/div[1]/div[2]/button[2]';
+const confirmButtonXPath = '/html/body/div[3]/div/div[2]/div/div[2]/div/div[1]/div[2]/button';
+
+function clickButtonsInSequence() {
+    let firstButton = document.evaluate(firstButtonXPath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    if (firstButton) {
+        clickButton(firstButtonXPath, function() {
+            setTimeout(function() {
+                if (!isButtonDisabled(secondButtonXPath)) {
+                    clickButton(secondButtonXPath, function() {
+                        setTimeout(function() {
+                            clickButton(confirmButtonXPath);
+                        }, 2000);
+                    });
+                } else {
+                    console.log('Você não tem Starry Points suficientes.');
+                    clearInterval(interval);
+                }
+            }, 1000);
+        });
+    } else {
+        console.log('Execute o código na página de Baús.');
+        clearInterval(interval);
+    }
+}
+
+let interval = setInterval(function() {
+    clickButtonsInSequence();
+}, 1000);
